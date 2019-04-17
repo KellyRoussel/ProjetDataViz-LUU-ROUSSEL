@@ -1,0 +1,66 @@
+---
+title: "Projet DataViz"
+author: "Kahune LUU - Kelly ROUSSEL"
+date: "17 avril 2019"
+output:
+ html_document: 
+    toc: yes #Table des manières (Table of contents)
+    toc_depth: 2 #Profondeur de la toc
+    code_folding: "hide" #Il faut cliquer sur code pour voir le code
+    number_sections: TRUE #Met les numéros de sections tout seul !
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r libraries, warning = FALSE, message=FALSE}
+library(ggplot2)
+library(dplyr)
+library(DT)
+library(dygraphs)
+library(xts)
+library(hrbrthemes) #Pckge de personnalisation
+library(plotly) #Interactif
+```
+
+
+Ecrire un blabla sur les inégalités et la parité dans le monde et les liens entre différents facteurs etc.
+Bref on va étudier des chiffres sur le sujet
+```{r donnees, warning=FALSE, message=FALSE}
+data = read.csv('DonneesParite.csv', sep=";")
+#datatable(data, rownames = FALSE, filter="top", options = list(pageLength = 5, scrollX=T) )
+```
+
+
+
+```{r grapheFertiliteTempsFranceInteractif,warning=FALSE, message=FALSE}
+dataFrance = data%>%
+  filter(Country=="France")
+
+dataFrance$Year = as.Date(dataFrance$Year,"%Y")
+dataFrance = dataFrance%>%
+  filter(!is.na(Year))
+
+don=xts(x = dataFrance$FertilityRate, order.by = dataFrance$Year) #On créer un format xts
+dygraph(don)#On trace
+```
+
+```{r grapheEsperanceVieTempsFranceInteractif,warning=FALSE, message=FALSE}
+don=xts(x = dataFrance$LifeExpectancyFemale, order.by = dataFrance$Year) #On créer un format xts
+dygraph(don)#On trace
+```
+
+
+```{r grapheBulleInteractif, echo = FALSE, fig.height=5, fig.width = 7, fig.align='center', warning = FALSE, message = FALSE}
+
+#Personnalisation : theme_ipsum, transparence = alpha
+p = data %>%
+  filter(Year == 1990) %>%
+  filter(!is.na(GDP))%>%
+  filter(!is.na(LifeExpectancyFemale))%>%
+  ggplot( aes(x=GDP, y = FertilityRate, size = GovernmentEducationExpenditure, color = MarriedWomenRequiredToObeyHusbands)) +
+  geom_point(alpha = 0.7, stroke = "white", shpae = 21) + theme_ipsum()
+ggplotly(p);
+```
