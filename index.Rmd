@@ -37,6 +37,7 @@ data = read.csv('DonneesParite.csv', sep=";")
 # Fertilité
 
 ##Fertilité des femmes françaises
+Petit blabla. On peut s'aapuyer et citer ce site très intéressant : [source](http://pilule-contraceptive.e-monsite.com/pages/la-contraception-dans-l-histoire.html)
 
 ```{r grapheFertiliteTempsFranceInteractif,warning=FALSE, message=FALSE, fig.align='center'}
 dataFrance = data%>%
@@ -46,9 +47,8 @@ dataFrance$Year = as.Date(dataFrance$Year,"%Y")
 dataFrance = dataFrance%>%
   filter(!is.na(Year))
 
-data=data.frame(time=seq(from=Sys.Date()-40, to=Sys.Date(), by=1 ), value=runif(41))
 don=xts(x = dataFrance$FertilityRate, order.by = dataFrance$Year)#On créer un format xts
-dygraph(don, main= "Nombre d'enfants par femmes en France entre 1960 et 2016")%>%
+dygraph(don, main= "Nombre d'enfants par femmes en France entre 1960 et 2016",ylab = "Nombre d'enfants par femme", xlab="Années")%>%
    dyShading(from="1964-1-1", to="1978-1-1", color="#FFE6E6") %>%
    dyShading(from="1995-1-1", to="2016-1-1", color="#CCEBD6")
 ```
@@ -90,10 +90,28 @@ datatriFert2016 = tail(data2016triPIB,15)%>%
 datatriFert2016%>%
   ggplot(aes(x=Country, y = FertilityRate))+
      geom_segment(aes(x=Country, xend=Country, y=0, yend=FertilityRate), color = "blue")+
-      geom_point(color = "#0066ff", size = 4) + coord_flip() + ggtitle("Nombre d'enfants par femme des 15 pays au PIB le plus important en 2016")
+      geom_point(color = "#0066ff", size = 4) + coord_flip() + ggtitle("Nombre d'enfants par femme des 15 pays au PIB le plus important en 2016")+
+        xlab("Nombre d'enfants par femme") + ylab("Pays") + theme_ipsum()
 ```
 
 Petit Topo sur le graphique
+
+La Corée c'est du à la politique antinataliste menée par le régime militaire entre 1961 et 1987. [source](http://www.amitiefrancecoree.org/article-30641162.html)
+
+```{r essai}
+dataKorea = data%>%
+  filter(Country == "Korea, Rep.")
+
+dataKorea$Year = as.Date(dataKorea$Year,"%Y")
+dataKorea = dataKorea%>%
+  filter(!is.na(Year))
+
+
+don=xts(x = dataKorea$FertilityRate, order.by = dataKorea$Year)#On créer un format xts
+dygraph(don, main= "Nombre d'enfants par femmes en Corée du Sud entre 1960 et 2016",ylab = "Nombre d'enfants par femme", xlab="Années")%>%
+   dyShading(from="1961-1-1", to="1987-1-1", color="#FFE6E6")
+
+```
 
 #Espérance de vie
 
@@ -103,6 +121,6 @@ Introduction à l'espérance de vie etc
 xdata=data.frame(y=dataFrance$Year, Femmes=dataFrance$LifeExpectancyFemale, Hommes=dataFrance$LifeExpectancyMale)
 
 don=xts(x = xdata[,-1], order.by = xdata$y)#On créer un format xts
-dygraph(don, main= "Espérance de vie en France entre 1960 et 2016")
+dygraph(don, main= "Espérance de vie en France entre 1960 et 2016", xlab = "Années", ylab = "Espérance de vie")
 ```
 
