@@ -10,6 +10,7 @@ output:
     number_sections: TRUE #Met les numéros de sections tout seul !
 ---
 
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -25,7 +26,7 @@ library(hrbrthemes) #Pckge de personnalisation
 library(plotly) #Interactif
 ```
 
-
+# Introduction
 Ecrire un blabla sur les inégalités et la parité dans le monde et les liens entre différents facteurs etc.
 Bref on va étudier des chiffres sur le sujet
 ```{r donnees, warning=FALSE, message=FALSE}
@@ -33,9 +34,11 @@ data = read.csv('DonneesParite.csv', sep=";")
 #datatable(data, rownames = FALSE, filter="top", options = list(pageLength = 5, scrollX=T) )
 ```
 
+# Fertilité
 
+##Fertilité des femmes françaises
 
-```{r grapheFertiliteTempsFranceInteractif,warning=FALSE, message=FALSE}
+```{r grapheFertiliteTempsFranceInteractif,warning=FALSE, message=FALSE, fig.align='center'}
 dataFrance = data%>%
   filter(Country=="France")
 
@@ -43,24 +46,63 @@ dataFrance$Year = as.Date(dataFrance$Year,"%Y")
 dataFrance = dataFrance%>%
   filter(!is.na(Year))
 
-don=xts(x = dataFrance$FertilityRate, order.by = dataFrance$Year) #On créer un format xts
-dygraph(don)#On trace
+data=data.frame(time=seq(from=Sys.Date()-40, to=Sys.Date(), by=1 ), value=runif(41))
+don=xts(x = dataFrance$FertilityRate, order.by = dataFrance$Year)#On créer un format xts
+dygraph(don, main= "Nombre d'enfants par femmes en France entre 1960 et 2016")%>%
+   dyShading(from="1964-1-1", to="1978-1-1", color="#FFE6E6") %>%
+   dyShading(from="1995-1-1", to="2016-1-1", color="#CCEBD6")
 ```
 
-```{r grapheEsperanceVieTempsFranceInteractif,warning=FALSE, message=FALSE}
-don=xts(x = dataFrance$LifeExpectancyFemale, order.by = dataFrance$Year) #On créer un format xts
-dygraph(don)#On trace
-```
+Ecrire ici un petit topo sur le diagramme
 
+## Fertilité dans le monde
+Ecrire ici un petit topo sur le PIB et les 10 pays avec les plus grands PIB etc
 
-```{r grapheBulleInteractif, echo = FALSE, fig.height=5, fig.width = 7, fig.align='center', warning = FALSE, message = FALSE}
+```{r grapheFertilitePays, fig.align='center', warning = FALSE, message=FALSE}
+data = read.csv('DonneesParite.csv', sep=";")
 
-#Personnalisation : theme_ipsum, transparence = alpha
-p = data %>%
-  filter(Year == 1990) %>%
+data$FertilityRate = as.numeric(as.character(data$FertilityRate))
+data$GDP = as.numeric(as.character(data$GDP))
+
+data2016=data%>%
+  filter(Year=="2016")%>%
   filter(!is.na(GDP))%>%
-  filter(!is.na(LifeExpectancyFemale))%>%
-  ggplot( aes(x=GDP, y = FertilityRate, size = GovernmentEducationExpenditure, color = MarriedWomenRequiredToObeyHusbands)) +
-  geom_point(alpha = 0.7, stroke = "white", shpae = 21) + theme_ipsum()
-ggplotly(p);
+  filter(!is.na(FertilityRate))
+
+#On tri par PIB
+data2016triPIB = data2016%>%
+  arrange(GDP)%>% #Réordonnement
+  mutate(Country = factor(Country,Country))
+
+#tail(data2016triPIB,5)%>%
+ # ggplot(aes(x=Country, y = GDP))+
+  #   geom_segment(aes(x=Country, xend=Country, y=0, yend=GDP), color = "green")+
+   #   geom_point(color = "green", size = 4) + coord_flip()
+
+
+
+#On sélectionne les 10 pays ayant le plus grand PIB et on les tri par taux de fertilité
+
+datatriFert2016 = tail(data2016triPIB,15)%>%
+  arrange(FertilityRate)%>% #Réordonnement
+  mutate(Country = factor(Country,Country))
+
+datatriFert2016%>%
+  ggplot(aes(x=Country, y = FertilityRate))+
+     geom_segment(aes(x=Country, xend=Country, y=0, yend=FertilityRate), color = "blue")+
+      geom_point(color = "#0066ff", size = 4) + coord_flip() + ggtitle("Nombre d'enfants par femme des 15 pays au PIB le plus important en 2016")
 ```
+
+Petit Topo sur le graphique
+
+#Espérance de vie
+
+Introduction à l'espérance de vie etc
+
+```{r grapheEsperanceVieTempsFranceInteractif,warning=FALSE, message=FALSE, fig.align='center'}
+xdata=data.frame(y=dataFrance$Year, Femmes=dataFrance$LifeExpectancyFemale, Hommes=dataFrance$LifeExpectancyMale)
+
+don=xts(x = xdata[,-1], order.by = xdata$y)#On créer un format xts
+dygraph(don, main= "Espérance de vie en France entre 1960 et 2016")
+```
+
