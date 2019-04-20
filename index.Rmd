@@ -80,6 +80,7 @@ dygraph(don, main= "Nombre d'enfants par femmes en France entre 1960 et 2016",yl
 data = read.csv('DonneesParite.csv', sep=";")
 
 data$FertilityRate = as.numeric(as.character(data$FertilityRate))
+data$FemaleEmploymentIndustry = as.numeric(as.character(data$FemaleEmploymentIndustry))
 data$GDP = as.numeric(as.character(data$GDP))
 
 data2016=data%>%
@@ -149,5 +150,30 @@ xdata=data.frame(y=dataFrance$Year, Femmes=dataFrance$LifeExpectancyFemale, Homm
 
 don=xts(x = xdata[,-1], order.by = xdata$y)#On créer un format xts
 dygraph(don, main= "Espérance de vie en France entre 1960 et 2016", xlab = "Années", ylab = "Espérance de vie")
+```
+
+#Emploi
+
+```{r Emploi, warning=FALSE, message=FALSE}
+dataFrance1990 = dataFrance%>%
+  filter(Year > 1989)
+  
+don=xts(x = dataFrance1990$LaborForceFemale, order.by = dataFrance1990$Year)#On créer un format xts
+dygraph(don, main= "Part de femmes dans la main d'oeuvre Française entre 1960 et 2016",ylab = "Pourcentage de femmes", xlab="Années")
+
+```
+
+```{r EmploiIndustrie, warning=FALSE, message=FALSE}
+#On sélectionne les 15 pays ayant le plus grand PIB et on les tri par taux de fertilité
+
+datatriEmplInd2016 = tail(data2016triPIB,15)%>%
+  arrange(FemaleEmploymentIndustry)%>% #Réordonnement
+  mutate(Country = factor(Country,Country))
+
+datatriEmplInd2016%>%
+  ggplot(aes(x=Country, y = FemaleEmploymentIndustry))+
+     geom_segment(aes(x=Country, xend=Country, y=0, yend=FemaleEmploymentIndustry), color = "blue")+
+      geom_point(color = "#0066ff", size = 4) + coord_flip() + ggtitle("Part de femmes dans l'industrie des 15 pays au PIB le plus important en 2016")+
+        xlab("Pourcentage de femmes") + ylab("Pays") + theme_ipsum()
 ```
 
