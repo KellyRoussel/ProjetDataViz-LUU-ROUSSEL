@@ -10,6 +10,7 @@ output:
     number_sections: TRUE #Met les numéros de sections tout seul !
 ---
 
+> Réalisé à  ![IMT](imtlogo.png)
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -27,8 +28,15 @@ library(plotly) #Interactif
 ```
 
 # Introduction
-Ecrire un blabla sur les inégalités et la parité dans le monde et les liens entre différents facteurs etc.
-Bref on va étudier des chiffres sur le sujet
+  Education, emploi, retraite, santé, politique,... les inégalités entre les hommes et les femmes presistent dans le monde entier dans de nombreux domaines. 
+
+  Si les pays du Nord comme **l'Islande, la Norvège et la Finlande**, en tête du classement des pays les plus performants en terme de réduction des inégalités, présentent des écarts de salaire entre les hommes et les femmes très restreints, des représentations paritaires aux assemblées politiques et des postes techniques, d'ingénierie ou encore de direction accessibles à tous, d'autres sont plus à la traîne... Côté Français, le pays gagne 59 places entre 2006 et 2016 et place de la 70ème à la 11ème position, au premier rang des pays du G20. Malgré la 6ème place du Rwanda grâce à son intégration politique des femmes, l'Afrique peine à monter dans le classement.
+
+  Même si de nombreux progrès ont été fait ces dernières années en terme de parité, la loi de Pareto s'applique aussi à ce combat pour l'égalité: **au rythme actuel, on estime qu'il faudra encore un siècle pour combler l'écart global entre les hommes et les femmes à l'échelle de la planète.** [source1](https://www.lesechos.fr/2017/11/egalite-hommesfemmes-pas-avant-un-siecle-selon-le-forum-economique-mondial-186700) [source2](https://e-rse.net/top-pays-egalite-homme-femme-parite-25509/#gs.695ujc)
+
+  En tant que futures ingénieures dans un domaine où les femmes sont encore largement sous-représentées, nous avons souhaité mettre en lumière quelques chiffres révélateurs es conditions des femmes dans le monde. 
+
+*Le jeu de données utilisés provient du site :* https://data.worldbank.org/
 ```{r donnees, warning=FALSE, message=FALSE}
 data = read.csv('DonneesParite.csv', sep=";")
 #datatable(data, rownames = FALSE, filter="top", options = list(pageLength = 5, scrollX=T) )
@@ -36,8 +44,18 @@ data = read.csv('DonneesParite.csv', sep=";")
 
 # Fertilité
 
+  La fertilité correspond ici au **nombre moyen d'enfants par femme**. Il peut être intéressant car révélateur de l'accès à la contraception d'une population. Dans la plupart des pays où ce chiffre est élevé, cela correspond également à un nombre important de femmes au foyer par opposition à celle exercant un métier hors du foyer à temps plein.
+
+  *Il est intéressant de noter que nous n'avons pas trouver de données concernant le nombre d'enfants par homme. La fertilité d'une population s'exprime traditionnellement en nombre d'enfant par femme... une tradition qu'il serait peut être bon de bousculer !*
+
+
 ##Fertilité des femmes françaises
-Petit blabla. On peut s'aapuyer et citer ce site très intéressant : [source](http://pilule-contraceptive.e-monsite.com/pages/la-contraception-dans-l-histoire.html)
+
+  Etudions d'abord l'évolution de ce chiffre en France. 
+  
+  On constate d'abod une forte diminution du nombre d'enfants par femme Française en rouge entre 1964 et 1978. Cette baisse notable est due notamment à l'introduction en France de la pilule contraceptive, légale en France à partir de 1967mais distribuée par des centres de plannification familiale clandestins dès 1961.Entre 1967 et 1987, la proportion de femmes entre 15 et 49 ans prenant la pilule passe de 4 à 30%. C'est le seul moyen de contraception qui a un impact significative sur l'évolution de la fertilité en France à cette période.
+
+  Après s'être stabilisé entre 1980 et 2000, le nombre d'enfants par femmes augmente pour arriver en 2016 à 1,96. [source](http://pilule-contraceptive.e-monsite.com/pages/la-contraception-dans-l-histoire.html)
 
 ```{r grapheFertiliteTempsFranceInteractif,warning=FALSE, message=FALSE, fig.align='center'}
 dataFrance = data%>%
@@ -53,12 +71,12 @@ dygraph(don, main= "Nombre d'enfants par femmes en France entre 1960 et 2016",yl
    dyShading(from="1995-1-1", to="2016-1-1", color="#CCEBD6")
 ```
 
-Ecrire ici un petit topo sur le diagramme
 
 ## Fertilité dans le monde
-Ecrire ici un petit topo sur le PIB et les 10 pays avec les plus grands PIB etc
 
-```{r grapheFertilitePays, fig.align='center', warning = FALSE, message=FALSE}
+  Intéressons-nous maintenant à l'évolution du nombre d'enfants par femme dans le monde. 
+
+```{r minmaxFert, warning = FALSE, message=FALSE}
 data = read.csv('DonneesParite.csv', sep=";")
 
 data$FertilityRate = as.numeric(as.character(data$FertilityRate))
@@ -69,19 +87,26 @@ data2016=data%>%
   filter(!is.na(GDP))%>%
   filter(!is.na(FertilityRate))
 
+
+fertMax = max(data2016$FertilityRate)
+countryFertMax = data2016[data2016$FertilityRate == fertMax, "Country"]
+print(paste0("Le pays ayant la fertilité maximale est: ", countryFertMax, " avec ", fertMax, " enfants par femme en moyenne."))
+
+fertMin = min(data2016$FertilityRate)
+countryFertMin = data2016[data2016$FertilityRate == fertMin, "Country"]
+print(paste0("Le pays ayant la fertilité minimale est: ", countryFertMin, " avec ", fertMin, " enfants par femme en moyenne."))
+
+```
+
+  *Afin de ne pas surcharger l'information, on s'intéresse aux nombres d'enfants par femme des 15 pays ayant les PIB les plus élevés. Cela permet de comparer des pays avec des moyens financiers élevés et proches.*
+
+```{r grapheFertilitePays, fig.align='center', warning = FALSE, message=FALSE}
 #On tri par PIB
 data2016triPIB = data2016%>%
   arrange(GDP)%>% #Réordonnement
   mutate(Country = factor(Country,Country))
 
-#tail(data2016triPIB,5)%>%
- # ggplot(aes(x=Country, y = GDP))+
-  #   geom_segment(aes(x=Country, xend=Country, y=0, yend=GDP), color = "green")+
-   #   geom_point(color = "green", size = 4) + coord_flip()
-
-
-
-#On sélectionne les 10 pays ayant le plus grand PIB et on les tri par taux de fertilité
+#On sélectionne les 15 pays ayant le plus grand PIB et on les tri par taux de fertilité
 
 datatriFert2016 = tail(data2016triPIB,15)%>%
   arrange(FertilityRate)%>% #Réordonnement
@@ -93,10 +118,9 @@ datatriFert2016%>%
       geom_point(color = "#0066ff", size = 4) + coord_flip() + ggtitle("Nombre d'enfants par femme des 15 pays au PIB le plus important en 2016")+
         xlab("Nombre d'enfants par femme") + ylab("Pays") + theme_ipsum()
 ```
+  Les taux de fertilité de ces pays sont tous compris entre 1 et 2.5. En mettant en rapport ces chiffres avec celui du Niger de plus de 7 enfants par femmes, on cherche à comprendre les origines de cette grande différence. Celle-ci peut avoir plusieurs causes: l'accès à la contracpetion, la culture,...
 
-Petit Topo sur le graphique
-
-La Corée c'est du à la politique antinataliste menée par le régime militaire entre 1961 et 1987. [source](http://www.amitiefrancecoree.org/article-30641162.html)
+  On s'aperçoit également que la Corée du Sud fait partie des pays les plus riches et représente pourtant le pays avec le taux de fertilité le plus bas. On s'intéresse alors à l'évolution de la natalité en Corée du Sud entre 1960 et 2016.
 
 ```{r essai}
 dataKorea = data%>%
@@ -112,6 +136,9 @@ dygraph(don, main= "Nombre d'enfants par femmes en Corée du Sud entre 1960 et 2
    dyShading(from="1961-1-1", to="1987-1-1", color="#FFE6E6")
 
 ```
+  On constate une chute très rapide du taux de fécondité entre 1961 et 1987. Cela s'explique la politique antinataliste menée par le régime militaire dans le pays à cette époque. 
+  En 2016, le nombre d'enfants par femme est de 1,17 et la tendance est encore à la baisse aujourd'hui. Cette évolution inquiète aujourd'hui le gouvernement qui a mis en place depuis 2006 des primes à la naissance afin d'enrayer cette chute démographique. Cependant, cette méthode est fortement remise en cause face à l'ampleur d'un autre phénomène : la difficulté pour une femme Coréenne de prendre un congé maternité sans perdre son emploi pourrait être à l'origine de la baisse des naissances. Face à ce risque, de nombreuses femmes font alors le choix de renconcer au fondement d'une famille.
+[source1](http://www.amitiefrancecoree.org/article-30641162.html) [source2](http://www.amitiefrancecoree.org/2018/09/l-inquietant-effondrement-de-la-natalite-en-coree-du-sud.html)
 
 #Espérance de vie
 
