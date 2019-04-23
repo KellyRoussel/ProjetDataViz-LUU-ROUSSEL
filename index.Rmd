@@ -314,7 +314,7 @@ dataBhutan = dataBhutan%>%
 xdata=data.frame(y=dataBhutan$Year, Femmes=dataBhutan$LifeExpectancyFemale, Hommes=dataBhutan$LifeExpectancyMale)
 
 don=xts(x = xdata[,-1], order.by = xdata$y)#On crée un format xts
-dygraph(don, main= "Espérance de vie au Buhtan entre 1960 et 2016", xlab = "Années", ylab = "Espérance de vie")
+dygraph(don, main= "Espérance de vie au Bhutan entre 1960 et 2016", xlab = "Années", ylab = "Espérance de vie")
 ```
 
 Au vu de ce graphique, on constate que les espérances de vie des femmes et des hommes du Bhutan sont naturellement très proches avec déjà une seule année d'écart en 1960. L'accès aux soins n'est donc pas forcément un facteur expliquant ce faible écart.
@@ -326,7 +326,15 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 <div class = "blue">
 
 **Conclusion**:<br><br>
-- <br>
+- Finalement, ces graphiques mettent bien en avant l'évolution colossale de la place de la femme dans la société française entre 1960 et 2018 notamment en termes économique et d'accès à la contraception. Cependant, l'égalité est encore loin d'être atteinte dans de nombreux domaines. Rappelons qu'aujourd'hui encore, le pourcentage de femmes parmi les ingénieur.e.s diplomé.e.s chaque année peine à dépasser les 30%et ce chiffre tend à baisser encore dans le domaine de l'informatique.<br>
+
+Dans le monde, les discriminations et inégalités persistent et restent très visibles, d'autant plus dans les pays en difficulté financière.<br>
+
+Les luttes pour plus d'égalité d'opportunités entre les pays pourraient ainsi représenter un premier pas vers plus d'égalité hommes-femmes au sein des sociétés.
 - 
 
 </div>
+
+
+
+
