@@ -229,7 +229,7 @@ datatriEmplInd2016%>%
   ggplot(aes(x=Country, y = FemaleEmploymentIndustry))+
      geom_segment(aes(x=Country, xend=Country, y=0, yend=FemaleEmploymentIndustry), color = "blue")+
       geom_point(color = "#0066ff", size = 4) + coord_flip() + ggtitle("Part de femmes employées dans l'industrie dans les 15 pays au PIB le plus élevé en 2016")+
-        xlab("Pays") + ylab("Pourcentgae de femmes employées travaillant dans l'industrie") + theme_ipsum(plot_title_size = 8)
+        xlab("Pays") + ylab("Pourcentage de femmes employées travaillant dans l'industrie") + theme_ipsum(plot_title_size = 8)
 ```
 
 On constate que la Chine est le pays comptant le plus de femmes employées travaillant dans l'industrie parmi les pays étudiés. Cela peut probablement s'expliquer par leur industrie textile très développée et privilégié par les femmes. Cependant, même ce pays ne présente pas plus de 23% de femmes emplyées travaillant dans l'industrie.
@@ -288,8 +288,8 @@ datatriDiffEspVie = tail(data2016triPIB,15)%>%
 datatriDiffEspVie%>%
   ggplot(aes(x=Country, y =diffEspVie))+
      geom_segment(aes(x=Country, xend=Country, y=0, yend=diffEspVie), color = "blue")+
-      geom_point(color = "#0066ff", size = 4) + coord_flip() + ggtitle("Différence d'espérance de vie entre femmes et hommes pour les 15 pays avec les PIB les plus élevés")+
-        xlab("Pays") + ylab("Différence d'espérance de vie entre femmes et hommes") + theme_ipsum()
+      geom_point(color = "#0066ff", size = 4) + coord_flip() + ggtitle("Différence d'espérance de vie femmes/hommes pour les 15pays avec les PIB les plus élevés")+
+        xlab("Pays") + ylab("Différence d'espérance de vie entre femmes et hommes") + theme_ipsum(plot_title_size = 8)
 ```
 
 La différence d'espérance de vie entre les hommes et les femmes en France est donc dans la moyenne. 
@@ -328,10 +328,10 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 **Conclusion**:<br><br>
 - Finalement, ces graphiques mettent bien en avant l'évolution colossale de la place de la femme dans la société française entre 1960 et 2018 notamment en termes économique et d'accès à la contraception. Cependant, l'égalité est encore loin d'être atteinte dans de nombreux domaines. Rappelons qu'aujourd'hui encore, le pourcentage de femmes parmi les ingénieur.e.s diplomé.e.s chaque année peine à dépasser les 30%et ce chiffre tend à baisser encore dans le domaine de l'informatique.<br>
 
-Dans le monde, les discriminations et inégalités persistent et restent très visibles, d'autant plus dans les pays en difficulté financière.<br>
+- Dans le monde, les discriminations et inégalités persistent et restent très visibles, d'autant plus dans les pays en difficulté financière.<br>
 
 Les luttes pour plus d'égalité d'opportunités entre les pays pourraient ainsi représenter un premier pas vers plus d'égalité hommes-femmes au sein des sociétés.
-- 
+
 
 </div>
 
