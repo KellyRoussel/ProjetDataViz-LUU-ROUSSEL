@@ -5,4 +5,4 @@ Ce projet consiste en la mise en lumière de données concernant la parité hommes-
 Ce projet est à but éducatif et a été réalisé dans le cadre du cours "Visualisation de données" qui nous a été dispensé à l'IMT Mines Alès par Yan Holtz.
 
 
-Lien du projet :
+Lien du projet : https://kellyroussel.github.io/ProjetDataViz-LUU-ROUSSEL/
