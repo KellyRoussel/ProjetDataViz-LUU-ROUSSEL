@@ -324,10 +324,10 @@ Au vu de ce graphique, on constate que les espérances de vie des femmes et des 
 div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 </style>
 <div class = "blue">
-test
+
 
 **Conclusion**:<br></br>
-test
+
 - Finalement, ces graphiques mettent bien en avant l'évolution colossale de la place de la femme dans la société française entre 1960 et 2018 notamment en termes économique et d'accès à la contraception. Cependant, l'égalité est encore loin d'être atteinte dans de nombreux domaines. Rappelons qu'aujourd'hui encore, le pourcentage de femmes parmi les ingénieur.e.s diplomé.e.s chaque année peine à dépasser les 30%et ce chiffre tend à baisser encore dans le domaine de l'informatique.<br>
 
 - Dans le monde, les discriminations et inégalités persistent et restent très visibles, d'autant plus dans les pays en difficulté financière.<br>
