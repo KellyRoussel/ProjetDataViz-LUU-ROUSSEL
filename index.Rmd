@@ -1,0 +1,340 @@
+---
+title: "Visualisation de données concernant la parité en France et dans le monde."
+author: "Kahune LUU - Kelly ROUSSEL"
+date: "23 avril 2019"
+output:
+ html_document: 
+    toc: yes #Table des manières (Table of contents)
+    toc_depth: 2 #Profondeur de la toc
+    code_folding: "hide" #Il faut cliquer sur code pour voir le code
+    number_sections: TRUE #Numéros de sections automatiques
+---
+
+> Réalisé à  ![IMT](imtlogo.png)
+
+```{r setup, include=FALSE, error=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r libraries, warning = FALSE, message=FALSE}
+library(ggplot2)
+library(dplyr)
+library(DT)
+library(dygraphs)
+library(xts)
+library(hrbrthemes) #Pckge de personnalisation
+library(plotly) #Interactif
+```
+
+# Introduction
+
+  Education, emploi, retraite, santé, politique,... les inégalités entre les hommes et les femmes persistent dans le monde entier dans de nombreux domaines. 
+
+  Si les pays du Nord comme **l'Islande, la Norvège et la Finlande**, en tête du classement des pays les plus performants en terme de réduction des inégalités, présentent des écarts de salaire entre les hommes et les femmes très restreints, des représentations paritaires aux assemblées politiques et des postes techniques, d'ingénierie ou encore de direction accessibles à tous, d'autres sont plus à la traîne... Côté Français, le pays gagne 59 places entre 2006 et 2016 et passe de la 70ème à la 11ème position, au premier rang des pays du G20. Malgré la 6ème place du Rwanda grâce à son intégration politique des femmes, l'Afrique peine à monter dans le classement.
+
+  Même si de nombreux progrès ont été faits ces dernières années en terme de parité, la loi de Pareto s'applique aussi à ce combat pour l'égalité: **au rythme actuel, on estime qu'il faudra encore un siècle pour combler l'écart global entre les hommes et les femmes à l'échelle de la planète.** [source1](https://www.lesechos.fr/2017/11/egalite-hommesfemmes-pas-avant-un-siecle-selon-le-forum-economique-mondial-186700) [source2](https://e-rse.net/top-pays-egalite-homme-femme-parite-25509/#gs.695ujc)
+
+  En tant que futures ingénieures dans un domaine où les femmes sont encore largement sous-représentées, nous avons souhaité mettre en lumière quelques chiffres révélateurs des conditions des femmes dans le monde. 
+
+*Le jeu de données utilisé provient du site :* https://data.worldbank.org/
+```{r donnees, warning=FALSE, message=FALSE}
+data = read.csv('DonneesParite.csv', sep=";")
+#datatable(data, rownames = FALSE, filter="top", options = list(pageLength = 5, scrollX=T) )
+```
+
+# Fertilité
+
+
+  La fertilité correspond ici au **nombre moyen d'enfants par femme**. Il peut être intéressant car révélateur de l'accès à la contraception d'une population. Dans la plupart des pays où ce chiffre est élevé, cela correspond également à un nombre important de femmes au foyer par opposition à celles exercant un métier hors du foyer à temps plein.
+
+  *Il est intéressant de noter que nous n'avons pas trouvé de données concernant le nombre d'enfants par homme. La fertilité d'une population s'exprime traditionnellement en nombre d'enfants par femme... une tradition qu'il serait peut être bon de bousculer !*
+
+
+##Fertilité des femmes françaises
+
+  Etudions d'abord l'évolution de ce chiffre en France. 
+  
+  On constate d'abord une forte diminution du nombre d'enfants par femme Française (*en rouge sur le graphique*) entre 1964 et 1978. Cette baisse notable est due notamment à l'introduction en France de la pilule contraceptive, légale en France à partir de 1967 mais distribuée par des centres de plannification familiale clandestins dès 1961. Entre 1967 et 1987, la proportion de femmes entre 15 et 49 ans prenant la pilule passe de 4 à 30%. C'est le seul moyen de contraception qui a un impact significatif sur l'évolution de la fertilité en France à cette période.
+
+  Après s'être stabilisé entre 1980 et 2000, le nombre d'enfants par femmes augmente pour arriver en 2016 à 1,96. [source](http://pilule-contraceptive.e-monsite.com/pages/la-contraception-dans-l-histoire.html)
+
+```{r grapheFertiliteTempsFranceInteractif,warning=FALSE, message=FALSE, fig.align='center'}
+#On filtre le dataFrame principal pour n'avoir que les données concernant la France
+#On nomme ce nouveau dataFrame: dataFrance
+dataFrance = data%>% 
+  filter(Country=="France") 
+
+#On transforme le type de la colonne Year en type Date
+dataFrance$Year = as.Date(dataFrance$Year,"%Y")
+dataFrance = dataFrance%>%
+  filter(!is.na(Year))# On enlève les lignes où l'année est vide
+
+#Plot
+don=xts(x = dataFrance$FertilityRate, order.by = dataFrance$Year)#On créer un format xts
+dygraph(don, main= "Nombre d'enfants par femmes en France entre 1960 et 2016",ylab = "Nombre d'enfants par femme", xlab="Années")%>%
+   dyShading(from="1964-1-1", to="1978-1-1", color="#FFE6E6") %>% #On crée un rectangle rouge entre 01/01/1964 et 01/01/1978: baisse
+   dyShading(from="1995-1-1", to="2016-1-1", color="#CCEBD6") #On crée un rectangle vert entre 01/01/1995 et 01/01/2016: augmentation
+```
+
+
+## Fertilité dans le monde
+
+
+  Intéressons-nous maintenant à l'évolution du nombre d'enfants par femme dans le monde. 
+
+```{r minmaxFert, warning = FALSE, message=FALSE}
+#Lecture du CSV
+data = read.csv('DonneesParite.csv', sep=";")
+
+#On change le type des données de factor à numeric pour les colonnes FertilityRate, FemaleEmploymentIndustry et GDP
+data$FertilityRate = as.numeric(as.character(data$FertilityRate)) 
+data$FemaleEmploymentIndustry = as.numeric(as.character(data$FemaleEmploymentIndustry)) 
+data$GDP = as.numeric(as.character(data$GDP)) 
+
+#On applique des filtres: Year = 2016 et on enlève les lignes où des données sont vides
+data2016=data%>%
+  filter(Year=="2016")%>%
+  filter(!is.na(GDP))%>%
+  filter(!is.na(FertilityRate))
+
+#On récupère l'indice de fécondité maximum
+fertMax = max(data2016$FertilityRate)
+#On récupère le pays dont l'indice de fécondité est maximum
+countryFertMax = data2016[data2016$FertilityRate == fertMax, "Country"]
+print(paste0("Le pays ayant la fertilité maximale est: ", countryFertMax, " avec ", fertMax, " enfants par femme en moyenne."))
+
+#On récupère l'indice de féconditié minimum
+fertMin = min(data2016$FertilityRate)
+#On récupère le pays dont l'indice de fécondité est minimum
+countryFertMin = data2016[data2016$FertilityRate == fertMin, "Country"]
+print(paste0("Le pays ayant la fertilité minimale est: ", countryFertMin, " avec ", fertMin, " enfants par femme en moyenne."))
+
+```
+
+  *Afin de ne pas surcharger l'information, on s'intéresse aux nombres d'enfants par femme des 15 pays ayant les PIB les plus élevés. Cela permet de comparer des pays avec des moyens financiers élevés et proches.*
+
+```{r grapheFertilitePays, fig.align='center', warning = FALSE, message=FALSE}
+#On trie par PIB
+data2016triPIB = data2016%>%
+  arrange(GDP)%>% #Réordonnement
+  mutate(Country = factor(Country,Country))
+
+#On sélectionne les 15 pays ayant le plus grand PIB et on les tri par taux de fertilité
+
+datatriFert2016 = tail(data2016triPIB,15)%>%
+  arrange(FertilityRate)%>% #Réordonnement
+  mutate(Country = factor(Country,Country))
+
+#Plot
+datatriFert2016%>%
+  ggplot(aes(x=Country, y = FertilityRate))+
+     geom_segment(aes(x=Country, xend=Country, y=0, yend=FertilityRate), color = "blue")+
+      geom_point(color = "#0066ff", size = 4) + coord_flip() + ggtitle("Nombre d'enfants par femme des 15 pays aux PIB les plus élevés en 2016")+
+        xlab("Pays") + ylab("Nombre d'enfants par femme") + theme_ipsum(plot_title_size = 10)
+```
+  **Les taux de fertilité de ces pays sont tous compris entre 1 et 2.5.**
+  
+  En mettant en rapport ces chiffres avec celui du Niger de plus de 7 enfants par femmes, on cherche à comprendre les origines de cette grande différence. Celle-ci peut avoir plusieurs causes: l'accès à la contraception, la culture,...
+
+  On s'aperçoit également que la Corée du Sud fait partie des pays les plus riches et représente pourtant le pays avec le taux de fertilité le plus bas. Pour tenter d'expliquer cette situation, on s'intéresse à l'évolution de la natalité en Corée du Sud entre 1960 et 2016.
+
+```{r essai}
+#On filtre pour n'avoir que les données concernant la Corée du Sud
+dataKorea = data%>%
+  filter(Country == "Korea, Rep.")
+
+
+dataKorea$Year = as.Date(dataKorea$Year,"%Y") # On transforme les années en Date
+#On enlève les lignes vides
+dataKorea = dataKorea%>%
+  filter(!is.na(Year))
+
+
+don=xts(x = dataKorea$FertilityRate, order.by = dataKorea$Year)#On crée un format xts
+dygraph(don, main= "Nombre d'enfants par femmes en Corée du Sud entre 1960 et 2016",ylab = "Nombre d'enfants par femme", xlab="Années")%>%
+   dyShading(from="1961-1-1", to="1987-1-1", color="#FFE6E6")
+
+```
+  On constate une chute très rapide du taux de fécondité entre 1961 et 1987. Cela s'explique la **politique antinataliste** menée par le régime militaire dans le pays à cette époque. 
+  En 2016, le nombre d'enfants par femme est de 1,17 et la tendance est encore à la baisse aujourd'hui. Cette évolution inquiète aujourd'hui le gouvernement qui a mis en place depuis 2006 des primes à la naissance afin d'enrayer cette chute démographique. Cependant, cette méthode est fortement remise en cause face à l'ampleur d'un autre phénomène : **la difficulté pour une femme Coréenne de prendre un congé maternité sans perdre son emploi pourrait être à l'origine de la baisse des naissances**. Face à ce risque, de nombreuses femmes font alors le choix de renconcer au fondement d'une famille.
+[source1](http://www.amitiefrancecoree.org/article-30641162.html) [source2](http://www.amitiefrancecoree.org/2018/09/l-inquietant-effondrement-de-la-natalite-en-coree-du-sud.html)
+
+
+#L'éducation 
+
+  L'indice de fécondité peut également être corrélé au taux d'obtention du diplôme équivalent au baccalauréat par les femmes. Intéressons-nous à ces données
+
+``` {r Education, warning = FALSE, message = FALSE}
+
+data$AtLeastBachelorFemale =  as.numeric(as.character(data$AtLeastBachelorFemale)) #On passe les données en numérique
+data$FertilityRate =  as.numeric(as.character(data$FertilityRate)) #On passe les données en numérique
+dataEducation = data %>%
+  filter(!is.na(AtLeastBachelorFemale)) #on enlève les lignes vides pour la colonne AtLeastBachelorFemale
+
+#Plot
+dataEducation%>%
+  ggplot(aes(x = AtLeastBachelorFemale, y = FertilityRate))+ geom_point(color = "blue", alpha = 0.5) + 
+  ggtitle("Indice de fécondité en fonction du pourcentage de femmes ayant obtenu leur baccalauréat")+
+  xlab("Pourcentage des femmes ayant obtenu le baccalauréat") + ylab("Indice de fécondité") +theme_ipsum(plot_title_size = 10)
+
+
+````
+
+
+
+On constate que plus le taux d'obtention du baccalauréat par les femmes augmente, plus l'indice de fécondité baisse. Cette tendance s'explique par l'envie et la possibilité qu'ont les femmes d'apprendre et de s'émanciper par le savoir et le travail. Ainsi, le projet de fonder une famille devient un projet personnel et secondaire.
+
+L'accès à l'éducation des filles est restreint dans de nombreux pays, faute de moyens financiers, pour des raisons culturelles ou d'autres. Dans de nombreux pays, les mariages précoces des jeunes filles les contraignent à s'occuper de leur foyer et les obligent à interrompre leur éducation. Dans d'autres pays, souvent les plus démunis, de nombreuses jeunes filles n'ont pas la possibilité de subvenir à leurs besoins en terme de protections hygiéniques durant leurs périodes de règles, les empêchant de suivre une scolarité normale. Ces constats sont des problèmes humains primordiaux qu'il faudrait éradiquer de manière prioritaire. 
+
+L'accès à l'éducation de tous les enfants et notamment des jeunes filles favoriserait une stabilisation démographique et une maternité plus souvent choisie et consciente. [source](https://www.plan-international.fr/ong/education-des-filles)
+
+
+#Emploi
+
+Si l'accès à l'éducation reste compliqué dans de nombreux pays, qu'en est-il de l'emploi ?
+
+##L'emploi en France
+
+Etudions d'abord la part de femmes dans la main d'oeuvre Française entre 1990 et 2018.
+
+```{r Emploi, warning=FALSE, message=FALSE}
+#On réutilise le dataFrame dataFrance et on applique un filtre Year > 1989
+dataFrance1990 = dataFrance%>%
+  filter(Year > 1989)
+
+#Plot 
+don=xts(x = dataFrance1990$LaborForceFemale, order.by = dataFrance1990$Year)#On crée un format xts
+dygraph(don, main= "Part de femmes dans la main d'oeuvre Française entre 1990 et 2018",ylab = "Pourcentage de femmes", xlab="Années")
+
+```
+
+Ce graphique montre clairement que la part de femmes dans la main d'oeuvre française n'a presque pas cessé d'augmenter entre 1990 et 2018 passant de **43% à plus de 47%**. L'implication des femmes dans la dimension économique de la société est aujourd'hui réelle en France.
+
+##L'emploi dans l'industrie dans le monde
+
+Cependant, étudiantes en école d'ingénieur.e.s, nous sommes conscientes de la difficulté d'intégration des femmes dans le milieu de l'industrie. Intéressons nous donc à la part de femmes emmplyées dans le milieu de l'industrie.
+
+ *Afin de ne pas surcharger l'information, on s'intéresse aux chiffres des 15 pays ayant les PIB les plus élevés. Cela permet de comparer des pays avec des moyens financiers élevés et proches.*
+
+```{r EmploiIndustrie, warning=FALSE, message=FALSE}
+#On sélectionne les 15 pays ayant le plus grand PIB et on les tri par taux de fertilité
+
+datatriEmplInd2016 = tail(data2016triPIB,15)%>%
+  arrange(FemaleEmploymentIndustry)%>% #Réordonnement
+  mutate(Country = factor(Country,Country))
+
+#Plot
+datatriEmplInd2016%>%
+  ggplot(aes(x=Country, y = FemaleEmploymentIndustry))+
+     geom_segment(aes(x=Country, xend=Country, y=0, yend=FemaleEmploymentIndustry), color = "blue")+
+      geom_point(color = "#0066ff", size = 4) + coord_flip() + ggtitle("Part de femmes employées dans l'industrie dans les 15 pays au PIB le plus élevé en 2016")+
+        xlab("Pays") + ylab("Pourcentgae de femmes employées travaillant dans l'industrie") + theme_ipsum(plot_title_size = 8)
+```
+
+On constate que la Chine est le pays comptant le plus de femmes employées travaillant dans l'industrie parmi les pays étudiés. Cela peut probablement s'expliquer par leur industrie textile très développée et privilégié par les femmes. Cependant, même ce pays ne présente pas plus de 23% de femmes emplyées travaillant dans l'industrie.
+
+
+#Espérance de vie
+
+Nous décidons ensuite d'étudier l'espérance de vie des femmes en France entre 1960 et 2016 en comparaison à celle des hommes.
+
+```{r grapheEsperanceVieTempsFranceInteractif,warning=FALSE, message=FALSE, fig.align='center'}
+#On crée un nouveau dataFrame avec les années, et l'espérance de vie des femmes et des hommes
+xdata=data.frame(y=dataFrance$Year, Femmes=dataFrance$LifeExpectancyFemale, Hommes=dataFrance$LifeExpectancyMale)
+
+don=xts(x = xdata[,-1], order.by = xdata$y)#On crée un format xts
+dygraph(don, main= "Espérance de vie en France entre 1960 et 2016", xlab = "Années", ylab = "Espérance de vie")
+```
+
+Ici, on constate d'abord un écart d'environ 8 ans de plus pour l'espérance de vie des femmes par apport à celle des hommes qui reste à peu près constant dans le temps. Cette différence s'explique par des facteurs physiques et physiologiques.
+Sur le sujet de la parité, ce qu'il est intéressant d'observer ici est l'évolution de l'espérance de vie des femmes quasiment identique à celle de l'espérance de vie des hommes. On peut alors en conclure que **les discriminations hommes / femmes en France concernent peu l'accès aux soins et à la santé**.
+
+```{r EspVieMonde, warning=FALSE, message=FALSE}
+
+#Passage des colonnes d'espérance de vie en numérique
+data2016triPIB$LifeExpectancyFemale = as.numeric(as.character(data2016triPIB$LifeExpectancyFemale)) 
+data2016triPIB$LifeExpectancyMale = as.numeric(as.character(data2016triPIB$LifeExpectancyMale))
+
+#Ajout d'une colonne correspondant à la différence d'espérance de vie
+data2016triPIBnotna = data2016triPIB%>%
+  filter(!is.na(LifeExpectancyFemale))%>%
+  filter(!is.na(LifeExpectancyMale))
+
+
+diffEspVie = data2016triPIBnotna$LifeExpectancyFemale - data2016triPIBnotna$LifeExpectancyMale
+data2016triPIB = cbind(data2016triPIBnotna, diffEspVie)
+
+#On récupère la différence maximum
+diffMax = max(data2016triPIB$diffEspVie)
+#On récupère le pays dont la différence est maximum
+countryDiffMax = data2016triPIB[data2016triPIB$diffEspVie == diffMax, "Country"]
+print(paste0("Le pays présentant la plus grande différence espérance de vie des femmes / espérance de vie des hommes est: ", countryDiffMax, " avec ", diffMax, " années de différence."))
+
+#On récupère la différence minimale
+diffMin = min(data2016triPIB$diffEspVie)
+#On récupère le pays dont la différence est minimale
+countryDiffMin = data2016triPIB[data2016triPIB$diffEspVie == diffMin, "Country"]
+print(paste0("Le pays présentant la plus petite différence espérance de vie des femmes / espérance de vie des hommes est: ", countryDiffMin, " avec ", diffMin, " années de différence."))
+
+#On sélectionne les 15 pays ayant le plus grand PIB et on les tri par différence d'espérance de vie
+
+datatriDiffEspVie = tail(data2016triPIB,15)%>%
+  arrange(diffEspVie)%>% #Réordonnement
+  mutate(Country = factor(Country,Country))
+
+
+#Plot
+datatriDiffEspVie%>%
+  ggplot(aes(x=Country, y =diffEspVie))+
+     geom_segment(aes(x=Country, xend=Country, y=0, yend=diffEspVie), color = "blue")+
+      geom_point(color = "#0066ff", size = 4) + coord_flip() + ggtitle("Différence d'espérance de vie entre femmes et hommes pour les 15 pays avec les PIB les plus élevés")+
+        xlab("Pays") + ylab("Différence d'espérance de vie entre femmes et hommes") + theme_ipsum()
+```
+
+La différence d'espérance de vie entre les hommes et les femmes en France est donc dans la moyenne. 
+
+Concernant le très faible écart présenté par le Bhutan on peut envisager que les femmes ont des difficultés d'accès aux soins qui expliquent cette faible différence d'espérance de vie avec les hommes malgré les différences physiologiques naturelles. On représente alors l'évolution des espérances de vie des femmes et des hommes au Bhutan entre 1960 et 2016.
+
+```{r grapheEsperanceVieTempsBhutanInteractif,warning=FALSE, message=FALSE, fig.align='center'}
+#On crée un nouveau dataFrame avec les années, et l'espérance de vie des femmes et des hommes
+
+#On filtre pour n'avoir que les données concernant la Corée du Sud
+dataBhutan = data%>%
+  filter(Country == "Bhutan")
+
+
+dataBhutan$Year = as.Date(dataBhutan$Year,"%Y") # On transforme les années en Date
+#On enlève les lignes vides
+dataBhutan = dataBhutan%>%
+  filter(!is.na(Year))
+
+
+#On crée un nouveau dataFrame avec les années, et l'espérance de vie des femmes et des hommes
+xdata=data.frame(y=dataBhutan$Year, Femmes=dataBhutan$LifeExpectancyFemale, Hommes=dataBhutan$LifeExpectancyMale)
+
+don=xts(x = xdata[,-1], order.by = xdata$y)#On crée un format xts
+dygraph(don, main= "Espérance de vie au Bhutan entre 1960 et 2016", xlab = "Années", ylab = "Espérance de vie")
+```
+
+Au vu de ce graphique, on constate que les espérances de vie des femmes et des hommes du Bhutan sont naturellement très proches avec déjà une seule année d'écart en 1960. L'accès aux soins n'est donc pas forcément un facteur expliquant ce faible écart.
+
+
+<style>
+div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
+</style>
+<div class = "blue">
+
+**Conclusion**:<br><br>
+- Finalement, ces graphiques mettent bien en avant l'évolution colossale de la place de la femme dans la société française entre 1960 et 2018 notamment en termes économique et d'accès à la contraception. Cependant, l'égalité est encore loin d'être atteinte dans de nombreux domaines. Rappelons qu'aujourd'hui encore, le pourcentage de femmes parmi les ingénieur.e.s diplomé.e.s chaque année peine à dépasser les 30%et ce chiffre tend à baisser encore dans le domaine de l'informatique.<br>
+
+Dans le monde, les discriminations et inégalités persistent et restent très visibles, d'autant plus dans les pays en difficulté financière.<br>
+
+Les luttes pour plus d'égalité d'opportunités entre les pays pourraient ainsi représenter un premier pas vers plus d'égalité hommes-femmes au sein des sociétés.
+- 
+
+</div>
+
+
+
+
